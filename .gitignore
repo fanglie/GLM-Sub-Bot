@@ -1,0 +1,163 @@
+# ==================== 依赖目录 ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# ==================== 日志文件 ====================
+# 自动生成的日志文件
+logs/
+*.log
+
+# ==================== 截图文件 ====================
+# 自动生成的截图
+screenshots/
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# ==================== 测试导出文件 ====================
+tests/test-logs-export.*
+tests/export.*
+
+# ==================== 系统文件 ====================
+# Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+System Volume Information/
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+
+# ==================== IDE 和编辑器 ====================
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# IntelliJ IDEA / WebStorm
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+.sass-cache/
+
+# Atom
+.atom/
+
+# Emacs
+*~
+\#*\#
+.*.swp
+
+# Vim
+*.swp
+*.swo
+*.swn
+*.un~
+.netrwhist
+
+# ==================== 操作系统缓存 ====================
+# Windows 缩略图缓存
+Thumbs.db
+
+# macOS 资源分支
+.AppleDouble
+.LSOverride
+
+# ==================== 临时文件 ====================
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ==================== 编译输出 ====================
+dist/
+build/
+out/
+
+# ==================== 环境配置文件 ====================
+# 敏感信息（如果未来需要）
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# ==================== 凭证和密钥 ====================
+# 绝对不要提交
+*.key
+*.pem
+*.crt
+*.cer
+credentials.json
+credentials.yaml
+credentials.yml
+secrets.json
+secrets.yaml
+secrets.yml
+
+# ==================== 数据库文件 ====================
+*.db
+*.sqlite
+*.sqlite3
+
+# ==================== 上传文件 ====================
+uploads/
+downloads/
+
+# ==================== 备份文件 ====================
+*.bak
+*.backup
+*.old
+
+# ==================== 压缩文件 ====================
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# ==================== 特定于项目的忽略 ====================
+# 如果未来有构建过程
+coverage/
+.nyc_output/
+
+# ==================== 文档生成 ====================
+# 如果未来生成文档
+apidoc/
+documentation/
+!docs/  # 但保留 docs 目录本身
+
+# ==================== 其他 ====================
+# 锁文件（如果不需要）
+*.lock
+
+# 错误日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 调试日志
+debug.log

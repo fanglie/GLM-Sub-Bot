@@ -1,0 +1,24 @@
+{
+  "name": "glm-coding-auto-buy",
+  "version": "1.0.0",
+  "description": "智谱 AI GLM Coding Plan Pro 套餐自动抢购脚本",
+  "main": "src/auto-buy-glm-pro-optimized.js",
+  "scripts": {
+    "start": "node src/auto-buy-glm-pro-optimized.js",
+    "start:precision": "node src/auto-buy-glm-pro-precision.js",
+    "start:standard": "node src/auto-buy-glm-pro.js",
+    "test": "node src/auto-buy-glm-pro-test.js",
+    "test:logger": "node tests/test-logger-system.js"
+  },
+  "keywords": [
+    "智谱 AI",
+    "GLM Coding",
+    "自动抢购",
+    "bigmodel"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.40.0"
+  }
+}
