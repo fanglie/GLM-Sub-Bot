@@ -44,11 +44,11 @@ const CONFIG = {
   
   // Chrome 用户数据目录（保持登录状态）
   // Windows 示例：
-  USER_DATA_DIR: 'C:\\Users\\fanglie\\AppData\\Local\\Google\\Chrome\\User Data',
+  // USER_DATA_DIR: 'C:\\Users\\你的用户名\\AppData\\Local\\Google\\Chrome\\User Data',
   // Mac 示例：
   // USER_DATA_DIR: '/Users/yourname/Library/Application Support/Google/Chrome/Default',
   // 如果不需要保持登录，设置为 false
-  // USER_DATA_DIR: false,
+  USER_DATA_DIR: false,
   
   // 重试配置
   MAX_RETRIES: 30,        // 最大重试次数（库存释放时可能需要多次尝试）
@@ -72,17 +72,29 @@ const SELECTORS = {
   // 用户已登录的标识（头像按钮）
   avatarButton: '[ref="e392"], .avatar-btn, .user-avatar',
   
+  // 用户未登录的标识（登录按钮）
+  loginButtons: [
+    'button:has-text("登录")',
+    'a:has-text("登录")',
+    '.login-btn',
+    '[ref*="login"]',
+    'text=请登录',
+  ],
+  
   // Pro 连续包月按钮（售罄状态）
   proPlanButtonSoldOut: '[ref="e401"], button:has-text("Pro 连续包月"), button:has-text("暂时售罄")',
   
-  // Pro 连续包月按钮（可用状态）
+  // Pro 连续包月按钮（可用状态）- 多选择器策略
   proPlanButtonAvailable: 'button.el-button.el-tooltip.buy-btn.el-button--primary:not(.is-disabled)',
   
-  // 通用订阅按钮（当 Pro 可用时）
+  // 通用订阅按钮（当 Pro 可用时）- 包含登录前后的各种文本
   subscribeButtons: [
     'button.buy-btn.el-button--primary:not(.is-disabled):has-text("特惠订阅")',
     'button.buy-btn.el-button--primary:not(.is-disabled):has-text("立即订阅")',
     'button.buy-btn.el-button--primary:not(.is-disabled):has-text("继续订阅")',
+    'button.buy-btn.el-button--primary:not(.is-disabled):has-text("立即抢购")',
+    'button.buy-btn.el-button--primary:not(.is-disabled):has-text("提交订单")',
+    'button.buy-btn.el-button--primary:not(.is-disabled):has-text("Pro 连续包月")',
   ],
   
   // 弹窗中的确认按钮
@@ -273,9 +285,20 @@ async function checkStockStatus(page) {
 async function clickProSubscribeButton(page) {
   const startTime = Date.now();
   logger.info('开始点击 Pro 套餐订阅按钮', {
-    strategies: 4,
+    strategies: 5,
     url: page.url(),
   }, 'CLICK');
+  
+  // ========== 阶段 0: 检测当前登录状态，适配按钮策略 ==========
+  const isLoggedIn = await checkIfLoggedIn(page);
+  logger.debug('当前登录状态', {
+    isLoggedIn,
+  }, 'CLICK');
+  
+  if (!isLoggedIn) {
+    logger.warning('检测到未登录状态，按钮可能不可用', {}, 'CLICK');
+    // 不直接返回 false，继续尝试查找登录按钮或提示
+  }
   
   // 策略 1: 直接点击 Pro 连续包月按钮（ref=e401）
   try {
@@ -283,11 +306,13 @@ async function clickProSubscribeButton(page) {
     if (await proButton.isVisible()) {
       const buttonClass = await proButton.getAttribute('class');
       const isDisabled = buttonClass?.includes('is-disabled');
+      const buttonText = await proButton.textContent();
       
       logger.debug('检查 Pro 连续包月按钮', {
         selector: '[ref="e401"]',
         isVisible: true,
         isDisabled,
+        buttonText: buttonText?.trim(),
         class: buttonClass,
       }, 'CLICK');
       
@@ -298,11 +323,16 @@ async function clickProSubscribeButton(page) {
         
         logger.success('点击 Pro 连续包月按钮成功', {
           selector: '[ref="e401"]',
+          buttonText: buttonText?.trim(),
           clickDuration: `${clickDuration}ms`,
           totalDuration: `${Date.now() - startTime}ms`,
         }, 'CLICK');
         
         return true;
+      } else {
+        logger.debug('Pro 按钮已禁用', {
+          buttonText: buttonText?.trim(),
+        }, 'CLICK');
       }
     }
   } catch (e) {
@@ -406,8 +436,35 @@ async function clickProSubscribeButton(page) {
     }, 'CLICK');
   }
   
+  // 策略 5: 如果未登录，尝试查找登录按钮并提示用户
+  if (!isLoggedIn) {
+    try {
+      const loginButtons = [
+        'button:has-text("登录")',
+        'a:has-text("登录")',
+        '.login-btn',
+        '[ref*="login"]',
+      ];
+      
+      for (const selector of loginButtons) {
+        const loginBtn = page.locator(selector).first();
+        if (await loginBtn.isVisible()) {
+          logger.warning('找到登录按钮，但需要用户手动登录', {
+            selector,
+          }, 'CLICK');
+          break;
+        }
+      }
+    } catch (e) {
+      // 忽略登录按钮查找错误
+    }
+    
+    logger.warning('当前未登录，请手动登录后脚本会继续执行', {}, 'CLICK');
+  }
+  
   logger.warning('所有点击策略均失败', {
     totalDuration: `${Date.now() - startTime}ms`,
+    isLoggedIn,
   }, 'CLICK');
   
   return false;
@@ -443,15 +500,77 @@ async function attemptSubscribe(page, attemptNum) {
         stockReleaseTime: `${stockReleaseTime}ms`,
       }, 'ATTEMPT');
       
+      // ========== 增强：点击前再次检查登录状态 ==========
+      const preClickLoggedIn = await checkIfLoggedIn(page);
+      if (!preClickLoggedIn) {
+        logger.warning('点击前检测到未登录，等待用户手动登录...', {
+          attemptNum,
+        }, 'AUTH');
+        
+        // 等待登录（最多等待 30 秒）
+        let waitCount = 0;
+        const maxWaitCount = 15; // 15 * 2s = 30s
+        while (!await checkIfLoggedIn(page) && waitCount < maxWaitCount) {
+          waitCount++;
+          if (waitCount % 3 === 0) {
+            logger.info('等待登录中...', {
+              attemptNum,
+              waitCount,
+              elapsed: `${waitCount * 2}秒`,
+            }, 'AUTH');
+          }
+          await sleep(2000);
+        }
+        
+        if (waitCount >= maxWaitCount) {
+          logger.error('等待登录超时', {
+            attemptNum,
+            maxWaitTime: '30 秒',
+          }, 'AUTH');
+          return false;
+        }
+        
+        logger.success('检测到已登录，继续点击...', {
+          attemptNum,
+          waitTime: `${waitCount * 2}秒`,
+        }, 'AUTH');
+        
+        // 登录后刷新页面确保 DOM 更新
+        await page.reload({ waitUntil: 'networkidle', timeout: 10000 });
+        await sleep(1000);
+        
+        // 重新检查库存状态（登录后可能变化）
+        const postLoginStockStatus = await checkStockStatus(page);
+        if (postLoginStockStatus !== 'AVAILABLE') {
+          logger.warning('登录后库存状态变化', {
+            attemptNum,
+            from: 'AVAILABLE',
+            to: postLoginStockStatus,
+          }, 'STOCK');
+          return false;
+        }
+      }
+      
       // 点击订阅按钮
       const clicked = await clickProSubscribeButton(page);
       const clickTime = Date.now() - attemptStartTime;
       
       if (!clicked) {
-        logger.error('未能点击订阅按钮', {
-          attemptNum,
-          clickTime: `${clickTime}ms`,
-        }, 'ATTEMPT');
+        // ========== 增强：点击失败后检查是否因为登录状态变化 ==========
+        const postClickLoggedIn = await checkIfLoggedIn(page);
+        if (!postClickLoggedIn) {
+          logger.warning('点击失败：检测到未登录状态', {
+            attemptNum,
+            clickTime: `${clickTime}ms`,
+          }, 'AUTH');
+          // 不立即返回 false，让主循环继续重试
+        } else {
+          logger.error('未能点击订阅按钮', {
+            attemptNum,
+            clickTime: `${clickTime}ms`,
+            isLoggedIn: postClickLoggedIn,
+          }, 'ATTEMPT');
+        }
         return false;
       }
       

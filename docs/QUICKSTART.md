@@ -3,8 +3,7 @@
 ## 第一步：安装依赖（仅需一次）
 
 ```bash
-# 进入项目目录
-cd F:\glmCodePlan
+# 进入项目目录（克隆仓库后自动位于正确目录）
 
 # 安装 npm 包
 npm install

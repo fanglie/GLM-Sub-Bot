@@ -46,7 +46,7 @@ https://www.bigmodel.cn/glm-coding?ic=GVUM2QVEWH
 打开命令行（CMD 或 PowerShell），进入脚本目录：
 
 ```bash
-cd F:\glmCodePlan
+# 进入项目目录（克隆后自动位于正确目录）
 ```
 
 安装 Playwright 浏览器自动化库：

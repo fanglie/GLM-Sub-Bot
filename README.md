@@ -12,7 +12,6 @@
 ### 1. 安装依赖
 
 ```bash
-cd F:\glmCodePlan
 npm install
 npx playwright install chromium
 ```
@@ -38,7 +37,7 @@ npm run start:standard
 ## 📁 项目结构
 
 ```
-F:\glmCodePlan/
+项目根目录/
 ├── 📄 README.md                    # 本文件
 ├── 📄 package.json                 # 项目配置
 │

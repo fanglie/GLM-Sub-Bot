@@ -3,7 +3,7 @@
 ## 🏗️ 目录结构
 
 ```
-F:\glmCodePlan/
+项目根目录/
 ├── 📄 README.md                    # 主文档（项目说明、快速开始）
 ├── 📄 package.json                 # 项目配置、依赖管理
 ├── 📄 package-lock.json            # 依赖版本锁定
@@ -210,7 +210,7 @@ xdg-open screenshots  # Linux
 
 ### 之前（混乱）
 ```
-F:\glmCodePlan/
+项目根目录/
 ├── auto-buy-logger.js
 ├── auto-buy-glm-pro-optimized.js
 ├── auto-buy-glm-pro.js
@@ -233,7 +233,7 @@ F:\glmCodePlan/
 
 ### 现在（清晰）
 ```
-F:\glmCodePlan/
+项目根目录/
 ├── README.md              # 只需看这个
 ├── package.json
 ├── src/                   # 所有脚本

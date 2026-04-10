@@ -9,7 +9,7 @@
 ## 🎯 Git 仓库结构
 
 ```
-F:\glmCodePlan/
+项目根目录/
 ├── ✅ 应该提交的文件
 │   ├── src/              # 所有源代码
 │   ├── tests/            # 测试文件
@@ -34,7 +34,6 @@ F:\glmCodePlan/
 ### 1. 初始化仓库（如果尚未初始化）
 
 ```bash
-cd F:\glmCodePlan
 git init
 ```
 

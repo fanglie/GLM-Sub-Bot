@@ -8,7 +8,11 @@
     "start:precision": "node src/auto-buy-glm-pro-precision.js",
     "start:standard": "node src/auto-buy-glm-pro.js",
     "test": "node src/auto-buy-glm-pro-test.js",
-    "test:logger": "node tests/test-logger-system.js"
+    "test:logger": "node tests/test-logger-system.js",
+    "test:login-adapter": "node src/test-login-adapter.js",
+    "test:login-adapter:not-logged": "node src/test-login-adapter.js not-logged",
+    "test:login-adapter:logged": "node src/test-login-adapter.js logged",
+    "test:login-adapter:buttons": "node src/test-login-adapter.js buttons"
   },
   "keywords": [
     "智谱 AI",

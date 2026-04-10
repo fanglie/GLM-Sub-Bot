@@ -389,19 +389,29 @@ async function runPrecisionAutoBuy() {
     ],
   };
   
+  let browser, context, page;
+  
+  // 如果配置了用户数据目录，使用 launchPersistentContext
   if (CONFIG.USER_DATA_DIR && typeof CONFIG.USER_DATA_DIR === 'string') {
-    browserOptions.userDataDir = CONFIG.USER_DATA_DIR;
-  }
-  
-  const browser = await chromium.launch(browserOptions);
-  
-  try {
-    const context = await browser.newContext({
+    log(`使用用户数据目录：${CONFIG.USER_DATA_DIR}`, 'INFO');
+    context = await chromium.launchPersistentContext(CONFIG.USER_DATA_DIR, {
+      ...browserOptions,
       viewport: { width: 1920, height: 1080 },
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     });
-    
-    const page = await context.newPage();
+    browser = null; // persistent context 没有 browser 对象
+    page = context.pages()[0] || await context.newPage();
+  } else {
+    log('未配置用户数据目录，可能需要手动登录', 'WARNING');
+    browser = await chromium.launch(browserOptions);
+    context = await browser.newContext({
+      viewport: { width: 1920, height: 1080 },
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    });
+    page = await context.newPage();
+  }
+  
+  try {
     
     page.setDefaultTimeout(CONFIG.ELEMENT_WAIT_TIMEOUT);
     page.setDefaultNavigationTimeout(CONFIG.PAGE_LOAD_TIMEOUT);
